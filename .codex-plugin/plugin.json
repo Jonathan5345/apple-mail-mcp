@@ -1,0 +1,23 @@
+{
+  "name": "apple-mail",
+  "version": "0.1.0",
+  "description": "通过本机 macOS 邮件 App 读取、搜索、整理邮件并创建草稿。",
+  "author": {
+    "name": "Apple Mail MCP contributors"
+  },
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Apple Mail 邮件",
+    "shortDescription": "读取、搜索和整理 Mac 邮件，起草回复",
+    "longDescription": "通过 macOS 邮件 App 读取、搜索和整理已配置的邮箱，并创建邮件草稿。无需保存邮箱密码。",
+    "developerName": "Apple Mail MCP contributors",
+    "category": "Productivity",
+    "defaultPrompt": [
+      "总结邮件 App 当前选中的邮件",
+      "查找指定邮箱中的未读邮件"
+    ],
+    "brandColor": "#1976E9",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/icon.svg"
+  }
+}

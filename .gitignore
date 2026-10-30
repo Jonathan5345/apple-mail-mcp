@@ -1,0 +1,16 @@
+# Local, generated machine configuration must never be committed.
+.mcp.json
+*.backup
+*.bak
+*.log
+*.local.*
+.env
+.env.*
+config.toml
+*-verification.json
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+dist/
+
