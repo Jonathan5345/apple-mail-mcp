@@ -14,7 +14,7 @@ class ServerTests(unittest.TestCase):
         response = server.handle({"id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05"}})
         self.assertEqual(response["result"]["protocolVersion"], "2024-11-05")
         tools = server.handle({"id": 2, "method": "tools/list"})["result"]["tools"]
-        self.assertEqual(len(tools), 9)
+        self.assertEqual(len(tools), 11)
         self.assertIsNone(server.handle({"method": "notifications/initialized"}))
 
     @patch("server.subprocess.run")

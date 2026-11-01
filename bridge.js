@@ -62,19 +62,50 @@ function run(argv) {
     }
     case 'selection':
         result = app.selection().slice(0,limit).map(m => summary(m,true)); break;
+    case 'unread_counts':
+    case 'mark_all_read': {
+        const targets = [], rows = [], errors = [];
+        function walk(parent, path, accountName) {
+            for (const child of parent.mailboxes()) {
+                const next = path.concat([child.name()]);
+                targets.push({box:child, account:accountName, mailbox:next});
+                walk(child, next, accountName);
+            }
+        }
+        if (p.mailbox) targets.push({box:box(p.mailbox),account:p.account,mailbox:p.mailbox});
+        else for (const a of (p.account ? [account()] : app.accounts())) walk(a, [], a.name());
+        for (const target of targets) {
+            const row = {account:target.account,mailbox:target.mailbox};
+            try {
+                const unread = target.box.messages.whose({readStatus:false});
+                row.before = unread().length;
+                if (p.action === 'mark_all_read' && row.before) unread.readStatus = true;
+                row.remaining = p.action === 'mark_all_read' ? unread().length : row.before;
+                rows.push(row);
+            } catch (e) { errors.push({account:row.account,mailbox:row.mailbox,error:String(e)}); }
+        }
+        result = {mailboxes:rows,errors:errors,complete:errors.length===0 && (p.action !== 'mark_all_read' || rows.every(r=>r.remaining===0)),
+            remaining_unread_occurrences:rows.reduce((n,r)=>n+r.remaining,0),
+            note:'Counts are mailbox occurrences; labels may overlap. Verification reflects local Mail state.'};
+        break;
+    }
     case 'search': {
         const b = box(p.mailbox), count = b.messages.length;
-        const scanned = Math.min(count,p.scan_limit || 500), out = [];
-        for (let i=0;i<scanned;i++) {
+        const offset = p.offset || 0, end = Math.min(count, offset + (p.scan_limit || 500)), out = [];
+        // Resolve location once; avoid recursive mailbox discovery for every result.
+        let next = offset;
+        for (let i=offset;i<end;i++) {
+            next = i + 1;
             const m=b.messages[i];
             if (p.unread_only && m.readStatus()) continue;
             if (p.subject && !m.subject().toLowerCase().includes(p.subject.toLowerCase())) continue;
             if (p.sender && !m.sender().toLowerCase().includes(p.sender.toLowerCase())) continue;
-            out.push(summary(m,false));
+            out.push({id:m.id(),account:p.account,mailbox:p.mailbox,subject:m.subject(),
+                sender:m.sender(),date_received:String(m.dateReceived()),read:m.readStatus(),flagged:m.flaggedStatus()});
             if (out.length >= limit) break;
         }
-        result={messages:out,mailbox_count:count,scan_limit:scanned,
-            possibly_more:count>scanned || out.length>=limit}; break;
+        result={messages:out,mailbox_count:count,scan_limit:Math.max(0,end-offset),
+            next_offset:next<count?next:null,possibly_more:next<count}; break;
     }
     case 'read': result=summary(message(),true); break;
     case 'update': {

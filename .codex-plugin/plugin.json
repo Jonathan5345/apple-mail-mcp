@@ -1,6 +1,6 @@
 {
   "name": "apple-mail",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "通过本机 macOS 邮件 App 读取、搜索、整理邮件并创建草稿。",
   "author": {
     "name": "Apple Mail MCP contributors"
